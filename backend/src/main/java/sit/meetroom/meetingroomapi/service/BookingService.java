@@ -1,6 +1,8 @@
 package sit.meetroom.meetingroomapi.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +15,6 @@ import sit.meetroom.meetingroomapi.mapper.BookingMapper;
 import sit.meetroom.meetingroomapi.repository.*;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service @RequiredArgsConstructor
 public class BookingService {
@@ -97,17 +98,14 @@ public class BookingService {
         throw new ForbiddenException("You do not have permission to access this booking");
     }
 
-    // --- Feature: My Bookings ---
-    public List<BookingResponseDto> listMyBookings() {
+    public Page<BookingResponseDto> listMyBookingsPaginated(Pageable pageable) {
         User currentUser = getCurrentUser();
-        List<Booking> bookings = bookingRepo.findAllByUserOrderByStartAtDesc(currentUser);
-
-        return bookingMapper.toBookingResponseDtoList(bookings);
+        Page<Booking> bookingPage = bookingRepo.findAllByUserOrderByStartAtDesc(currentUser, pageable);
+        return bookingPage.map(bookingMapper::toBookingResponseDto);
     }
 
-    // ---  Admin  ---
-    public List<BookingResponseDto> listAllBookings() {
-        List<Booking> bookings = bookingRepo.findAll();
-        return bookingMapper.toBookingResponseDtoList(bookings);
+    public Page<BookingResponseDto> listAllBookingsPaginated(Pageable pageable) {
+        Page<Booking> bookingPage = bookingRepo.findAll(pageable);
+        return bookingPage.map(bookingMapper::toBookingResponseDto);
     }
 }

@@ -1,5 +1,7 @@
 package sit.meetroom.meetingroomapi.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,18 +41,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("newEnd") Instant newEnd
     );
 
-    @Query("""
-  SELECT b
-  FROM Booking b
-  WHERE (:roomId IS NULL OR b.room.id = :roomId)
-    AND b.startAt < :to
-    AND b.endAt   > :from
-  """)
-    List<Booking> findForCalendar(@Param("roomId") Long roomId,
-                                  @Param("from") Instant from,
-                                  @Param("to") Instant to);
-
     List<Booking> findAllByUserOrderByStartAtDesc(User user);
 
     List<Booking> findAllByUserAndStartAtAfter(User user, Instant time);
+
+    Page<Booking> findAllByUserOrderByStartAtDesc(User user, Pageable pageable);
 }

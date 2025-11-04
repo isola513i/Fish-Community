@@ -2,12 +2,13 @@ package sit.meetroom.meetingroomapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sit.meetroom.meetingroomapi.dto.RoomDto;
 import sit.meetroom.meetingroomapi.service.RoomService;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -16,8 +17,8 @@ public class RoomController {
     private final RoomService roomService;
 
     @GetMapping
-    public List<RoomDto> list() {
-        return roomService.list();
+    public Page<RoomDto> list(Pageable pageable) {
+        return roomService.listPaginated(pageable);
     }
 
     @GetMapping("/{id}")
