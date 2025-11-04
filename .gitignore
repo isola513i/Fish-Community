@@ -33,6 +33,8 @@ HELP.md
 # =======================================
 backend/target/
 backend/logs/
+application-dev.properties
+application-prod.properties
 *.log
 
 # =======================================
