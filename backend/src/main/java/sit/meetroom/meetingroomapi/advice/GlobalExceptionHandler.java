@@ -1,6 +1,9 @@
 package sit.meetroom.meetingroomapi.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // Helper for Error Response
     private ResponseEntity<ErrorResponseDto> buildErrorResponse(HttpStatus status, String message, HttpServletRequest request) {
@@ -65,8 +70,11 @@ public class GlobalExceptionHandler {
 
     // 404 - Not Found
     @ExceptionHandler(java.util.NoSuchElementException.class)
-    public ResponseEntity<ErrorResponseDto> handleNoSuchElementException(java.util.NoSuchElementException ex, HttpServletRequest request) {
-        return buildErrorResponse(HttpStatus.NOT_FOUND, "The requested resource was not found", request);
+    public ResponseEntity<ErrorResponseDto> handleNoSuchElementException(
+            java.util.NoSuchElementException ex,
+            HttpServletRequest request) {
+        String message = ex.getMessage() != null ? ex.getMessage() : "The requested resource was not found";
+        return buildErrorResponse(HttpStatus.NOT_FOUND, message, request);
     }
 
     // 409 - Conflict
@@ -75,10 +83,21 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
     }
 
+    @Value("${spring.profiles.active:default}")
+    private String activeProfile;
+
     // 500 - Internal Server Error
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex, HttpServletRequest request) {
-        ex.printStackTrace();
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage(), request);
+    public ResponseEntity<ErrorResponseDto> handleGenericException(
+            Exception ex,
+            HttpServletRequest request) {
+        logger.error("Unexpected error at {}: ", request.getRequestURI(), ex);
+
+        String message = "dev".equals(activeProfile)
+                ? "An unexpected error occurred: " + ex.getMessage()
+                : "An unexpected error occurred. Please contact support.";
+
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, message, request);
     }
+
 }
