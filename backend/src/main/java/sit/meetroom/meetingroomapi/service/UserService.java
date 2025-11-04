@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sit.meetroom.meetingroomapi.config.SecurityUtils;
+import sit.meetroom.meetingroomapi.dto.AdminUserUpdateDto;
 import sit.meetroom.meetingroomapi.dto.ChangePasswordDto;
 import sit.meetroom.meetingroomapi.dto.ProfileUpdateDto;
 import sit.meetroom.meetingroomapi.dto.UserDto;
@@ -27,6 +28,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+    // --- User ---
     private User getCurrentUser() {
         String email = SecurityUtils.currentEmail();
         if (email == null) {
@@ -75,5 +77,25 @@ public class UserService {
         bookingRepo.saveAll(futureBookings);
         u.setIsActive(false);
         userRepo.save(u);
+    }
+
+    // --- Admin ---
+    public List<UserDto> listAllUsers() {
+        List<User> users = userRepo.findAll();
+        return userMapper.toUserDtoList(users);
+    }
+
+    public UserDto getUserById(Long id) {
+        User user = userRepo.findById(id).orElseThrow();
+        return userMapper.toUserDto(user);
+    }
+
+    @Transactional
+    public UserDto updateUser(Long id, AdminUserUpdateDto dto) {
+        User user = userRepo.findById(id).orElseThrow();
+        user.setRole(dto.role());
+        user.setIsActive(dto.isActive());
+        User savedUser = userRepo.save(user);
+        return userMapper.toUserDto(savedUser);
     }
 }
