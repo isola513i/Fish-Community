@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import sit.meetroom.meetingroomapi.dto.BookingCreateDto;
 import sit.meetroom.meetingroomapi.dto.BookingResponseDto;
 import sit.meetroom.meetingroomapi.dto.BookingUpdateDto;
-import sit.meetroom.meetingroomapi.entity.Booking;
 import sit.meetroom.meetingroomapi.service.BookingService;
-
-import java.time.Instant;
 import java.util.List;
 
 @RestController

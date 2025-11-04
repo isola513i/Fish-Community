@@ -39,9 +39,7 @@ public class SecurityConfig {
                         // Member/Authenticated Features
                         .requestMatchers(HttpMethod.GET, "/api/rooms", "/api/rooms/**").authenticated()
                         .requestMatchers("/api/bookings/**").authenticated()
-
-                        // TODO: เพิ่ม API สำหรับ Profile (Feature 6)
-                        // .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
+                        .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
