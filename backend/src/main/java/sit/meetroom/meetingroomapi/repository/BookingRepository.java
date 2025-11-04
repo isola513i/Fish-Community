@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import sit.meetroom.meetingroomapi.entity.Booking;
+import sit.meetroom.meetingroomapi.entity.User;
 
 import java.time.Instant;
 import java.util.List;
@@ -48,4 +49,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findForCalendar(@Param("roomId") Long roomId,
                                   @Param("from") Instant from,
                                   @Param("to") Instant to);
+
+    List<Booking> findAllByUserOrderByStartAtDesc(User user);
+
+    List<Booking> findAllByUserAndStartAtAfter(User user, Instant time);
 }

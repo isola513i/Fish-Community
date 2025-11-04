@@ -19,11 +19,9 @@ import java.util.List;
 public class BookingController {
     private final BookingService bookingService;
 
-    @GetMapping
-    public List<Booking> calendar(@RequestParam(required=false) Long roomId,
-                                  @RequestParam Instant from,
-                                  @RequestParam Instant to) {
-        return bookingService.calendar(roomId, from, to);
+    @GetMapping("/my-bookings")
+    public List<BookingResponseDto> getMyBookings() {
+        return bookingService.listMyBookings();
     }
 
     @PostMapping("")
