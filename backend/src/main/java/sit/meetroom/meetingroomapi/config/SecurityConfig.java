@@ -3,6 +3,7 @@ package sit.meetroom.meetingroomapi.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -30,6 +31,18 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/actuator/**", "/api/hello").permitAll()
+                        // Admin Features (Feature 1)
+                        .requestMatchers(HttpMethod.POST, "/api/rooms").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/rooms/**").hasRole("ADMIN")
+
+                        // Member/Authenticated Features
+                        .requestMatchers(HttpMethod.GET, "/api/rooms", "/api/rooms/**").authenticated()
+                        .requestMatchers("/api/bookings/**").authenticated()
+
+                        // TODO: เพิ่ม API สำหรับ Profile (Feature 6)
+                        // .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
