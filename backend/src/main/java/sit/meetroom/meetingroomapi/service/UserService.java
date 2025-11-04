@@ -1,6 +1,8 @@
 package sit.meetroom.meetingroomapi.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -80,9 +82,10 @@ public class UserService {
     }
 
     // --- Admin ---
-    public List<UserDto> listAllUsers() {
-        List<User> users = userRepo.findAll();
-        return userMapper.toUserDtoList(users);
+    // เปลี่ยนจาก List เป็น Page
+    public Page<UserDto> listAllUsers(Pageable pageable) {
+        Page<User> userPage = userRepo.findAll(pageable);
+        return userPage.map(userMapper::toUserDto);
     }
 
     public UserDto getUserById(Long id) {
