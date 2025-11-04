@@ -9,17 +9,18 @@ import sit.meetroom.meetingroomapi.dto.*;
 import sit.meetroom.meetingroomapi.entity.*;
 import sit.meetroom.meetingroomapi.exception.BookingConflictException;
 import sit.meetroom.meetingroomapi.exception.ForbiddenException;
+import sit.meetroom.meetingroomapi.mapper.BookingMapper;
 import sit.meetroom.meetingroomapi.repository.*;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor
 public class BookingService {
     private final BookingRepository bookingRepo;
     private final RoomRepository roomRepo;
     private final UserRepository userRepo;
+    private final BookingMapper bookingMapper;
 
     private User getCurrentUser() {
         String email = SecurityUtils.currentEmail(); //
@@ -51,7 +52,7 @@ public class BookingService {
                 .build();
 
         Booking savedBooking = bookingRepo.save(b);
-        return toResponseDto(savedBooking);
+        return bookingMapper.toBookingResponseDto(savedBooking);
     }
 
     @Transactional
@@ -73,7 +74,7 @@ public class BookingService {
         b.setEndAt(dto.endAt());
         b.setNotes(dto.notes());
 
-        return toResponseDto(b);
+        return bookingMapper.toBookingResponseDto(b);
     }
 
     @Transactional
@@ -96,46 +97,12 @@ public class BookingService {
         throw new ForbiddenException("You do not have permission to access this booking");
     }
 
-    // --- (NEW) Feature: My Bookings (Feature 4, 5) ---
+    // --- Feature: My Bookings ---
     public List<BookingResponseDto> listMyBookings() {
         User currentUser = getCurrentUser();
         List<Booking> bookings = bookingRepo.findAllByUserOrderByStartAtDesc(currentUser);
 
-        // แปลงเป็น DTO เพื่อแก้ปัญหา Lazy Loading และส่งข้อมูลที่จำเป็น
-        return bookings.stream()
-                .map(this::toResponseDto)
-                .collect(Collectors.toList());
+        return bookingMapper.toBookingResponseDtoList(bookings);
     }
 
-    private BookingResponseDto toResponseDto(Booking b) {
-        Room r = b.getRoom();
-        RoomDto roomDto = new RoomDto(
-                r.getId(),
-                r.getName(),
-                r.getCapacity(),
-                r.getLocation(),
-                r.getEquipmentsJson(),
-                r.getIsActive()
-        );
-
-        User u = b.getUser();
-        UserDto userDto = new UserDto(
-                u.getId(),
-                u.getFullName(),
-                u.getEmail(),
-                u.getRole().name()
-        );
-
-        return new BookingResponseDto(
-                b.getId(),
-                b.getTitle(),
-                b.getNotes(),
-                b.getStatus(),
-                b.getStartAt(),
-                b.getEndAt(),
-                b.getCancelledAt(),
-                roomDto,
-                userDto
-        );
-    }
 }
