@@ -135,8 +135,6 @@ class BookingServiceTest {
                 1L, "Team Meeting", start, end, null
         );
 
-        when(roomRepo.findById(1L)).thenReturn(Optional.of(testRoom));
-
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> bookingService.create(dto));
 

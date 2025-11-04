@@ -9,10 +9,6 @@ HELP.md
 *.iml
 *.ipr
 
-# Environment files
-.env
-.env.*
-
 ### STS ###
 .apt_generated
 .classpath
