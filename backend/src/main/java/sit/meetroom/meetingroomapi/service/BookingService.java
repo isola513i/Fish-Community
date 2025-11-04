@@ -1,15 +1,19 @@
 package sit.meetroom.meetingroomapi.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sit.meetroom.meetingroomapi.config.SecurityUtils;
 import sit.meetroom.meetingroomapi.dto.*;
 import sit.meetroom.meetingroomapi.entity.*;
 import sit.meetroom.meetingroomapi.exception.BookingConflictException;
+import sit.meetroom.meetingroomapi.exception.ForbiddenException;
 import sit.meetroom.meetingroomapi.repository.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor
 public class BookingService {
@@ -17,9 +21,13 @@ public class BookingService {
     private final RoomRepository roomRepo;
     private final UserRepository userRepo;
 
-    // TODO: เปลี่ยน userId เป็นค่าจาก JWT ภายหลัง
-    private User getMockUser() {
-        return userRepo.findById(1L).orElseThrow(); // dev ชั่วคราว
+    private User getCurrentUser() {
+        String email = SecurityUtils.currentEmail(); //
+        if (email == null) {
+            throw new UsernameNotFoundException("User not authenticated");
+        }
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
     @Transactional
@@ -34,7 +42,7 @@ public class BookingService {
 
         Booking b = Booking.builder()
                 .room(room)
-                .user(getMockUser())
+                .user(getCurrentUser())
                 .title(dto.title())
                 .startAt(dto.startAt())
                 .endAt(dto.endAt())
@@ -47,8 +55,11 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponseDto update(Long id, BookingUpdateDto dto) { //
+    public BookingResponseDto update(Long id, BookingUpdateDto dto) {
         Booking b = bookingRepo.findById(id).orElseThrow();
+
+        checkBookingPermission(b, getCurrentUser());
+
         if (!dto.startAt().isBefore(dto.endAt()))
             throw new IllegalArgumentException("endAt must be greater than startAt");
 
@@ -68,14 +79,32 @@ public class BookingService {
     @Transactional
     public void cancel(Long id) {
         Booking b = bookingRepo.findById(id).orElseThrow();
+
+        checkBookingPermission(b, getCurrentUser());
+
         b.setStatus(BookingStatus.CANCELLED);
         b.setCancelledAt(Instant.now());
     }
 
-    public List<Booking> calendar(Long roomId, Instant from, Instant to) {
-        // TODO: เมธอดนี้ก็จะเจอปัญหา Lazy เหมือนกัน
-        // ควรเปลี่ยน List<Booking> เป็น List<BookingResponseDto> ในอนาคต
-        return bookingRepo.findForCalendar(roomId, from, to);
+    private void checkBookingPermission(Booking booking, User currentUser) {
+        if (currentUser.getRole() == UserRole.ADMIN) {
+            return;
+        }
+        if (booking.getUser().getId().equals(currentUser.getId())) {
+            return;
+        }
+        throw new ForbiddenException("You do not have permission to access this booking");
+    }
+
+    // --- (NEW) Feature: My Bookings (Feature 4, 5) ---
+    public List<BookingResponseDto> listMyBookings() {
+        User currentUser = getCurrentUser();
+        List<Booking> bookings = bookingRepo.findAllByUserOrderByStartAtDesc(currentUser);
+
+        // แปลงเป็น DTO เพื่อแก้ปัญหา Lazy Loading และส่งข้อมูลที่จำเป็น
+        return bookings.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
 
     private BookingResponseDto toResponseDto(Booking b) {
