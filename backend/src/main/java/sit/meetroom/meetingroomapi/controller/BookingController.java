@@ -10,7 +10,6 @@ import sit.meetroom.meetingroomapi.dto.BookingCreateDto;
 import sit.meetroom.meetingroomapi.dto.BookingResponseDto;
 import sit.meetroom.meetingroomapi.dto.BookingUpdateDto;
 import sit.meetroom.meetingroomapi.service.BookingService;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
