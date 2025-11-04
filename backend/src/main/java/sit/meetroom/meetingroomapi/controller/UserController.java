@@ -12,8 +12,6 @@ import sit.meetroom.meetingroomapi.dto.ProfileUpdateDto;
 import sit.meetroom.meetingroomapi.dto.UserDto;
 import sit.meetroom.meetingroomapi.service.UserService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor

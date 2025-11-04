@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import sit.meetroom.meetingroomapi.dto.RoomDto;
 import sit.meetroom.meetingroomapi.service.RoomService;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/rooms")

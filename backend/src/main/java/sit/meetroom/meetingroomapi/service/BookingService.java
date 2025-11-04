@@ -15,7 +15,6 @@ import sit.meetroom.meetingroomapi.mapper.BookingMapper;
 import sit.meetroom.meetingroomapi.repository.*;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service @RequiredArgsConstructor
 public class BookingService {

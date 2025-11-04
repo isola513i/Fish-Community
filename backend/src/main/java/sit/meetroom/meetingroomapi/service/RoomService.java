@@ -10,7 +10,6 @@ import sit.meetroom.meetingroomapi.entity.Room;
 import sit.meetroom.meetingroomapi.mapper.RoomMapper;
 import sit.meetroom.meetingroomapi.repository.RoomRepository;
 
-import java.util.List;
 
 @Service @RequiredArgsConstructor
 public class RoomService {

@@ -41,17 +41,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("newEnd") Instant newEnd
     );
 
-    @Query("""
-  SELECT b
-  FROM Booking b
-  WHERE (:roomId IS NULL OR b.room.id = :roomId)
-    AND b.startAt < :to
-    AND b.endAt   > :from
-  """)
-    List<Booking> findForCalendar(@Param("roomId") Long roomId,
-                                  @Param("from") Instant from,
-                                  @Param("to") Instant to);
-
     List<Booking> findAllByUserOrderByStartAtDesc(User user);
 
     List<Booking> findAllByUserAndStartAtAfter(User user, Instant time);
