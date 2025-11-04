@@ -2,6 +2,8 @@ package sit.meetroom.meetingroomapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sit.meetroom.meetingroomapi.dto.BookingCreateDto;
@@ -18,14 +20,14 @@ public class BookingController {
 
     // --- Admin Endpoint ---
     @GetMapping("/all")
-    public List<BookingResponseDto> getAllBookings() {
-        return bookingService.listAllBookings();
+    public Page<BookingResponseDto> getAllBookings(Pageable pageable) {
+        return bookingService.listAllBookingsPaginated(pageable);
     }
 
     // --- User Endpoint ---
     @GetMapping("/my-bookings")
-    public List<BookingResponseDto> getMyBookings() {
-        return bookingService.listMyBookings();
+    public Page<BookingResponseDto> getMyBookings(Pageable pageable) {
+        return bookingService.listMyBookingsPaginated(pageable);
     }
 
     @PostMapping("")

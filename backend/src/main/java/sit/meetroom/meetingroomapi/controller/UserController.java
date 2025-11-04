@@ -2,6 +2,8 @@ package sit.meetroom.meetingroomapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sit.meetroom.meetingroomapi.dto.AdminUserUpdateDto;
@@ -44,8 +46,8 @@ public class UserController {
 
     // --- Admin Endpoints ---
     @GetMapping("")
-    public List<UserDto> getAllUsers() {
-        return userService.listAllUsers();
+    public Page<UserDto> getAllUsers(Pageable pageable) {
+        return userService.listAllUsers(pageable);
     }
 
     @GetMapping("/{id}")
