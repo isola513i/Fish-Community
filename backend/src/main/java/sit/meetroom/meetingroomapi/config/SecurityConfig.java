@@ -31,15 +31,23 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/actuator/**", "/api/hello").permitAll()
-                        // Admin Features (Feature 1)
+
+                        .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
+
+                        // Admin Features
                         .requestMatchers(HttpMethod.POST, "/api/rooms").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/rooms/**").hasRole("ADMIN")
 
-                        // Member/Authenticated Features
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/all").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
+
+                        // Other authenticated endpoints
                         .requestMatchers(HttpMethod.GET, "/api/rooms", "/api/rooms/**").authenticated()
                         .requestMatchers("/api/bookings/**").authenticated()
-                        .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
@@ -58,10 +66,8 @@ public class SecurityConfig {
         return provider;
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

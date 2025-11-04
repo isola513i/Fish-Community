@@ -4,10 +4,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import sit.meetroom.meetingroomapi.dto.AdminUserUpdateDto;
 import sit.meetroom.meetingroomapi.dto.ChangePasswordDto;
 import sit.meetroom.meetingroomapi.dto.ProfileUpdateDto;
 import sit.meetroom.meetingroomapi.dto.UserDto;
 import sit.meetroom.meetingroomapi.service.UserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -16,6 +19,7 @@ public class UserController {
 
     private final UserService userService;
 
+    // --- User Endpoints ---
     @GetMapping("/me")
     public UserDto getCurrentUserProfile() {
         return userService.getCurrentUserProfile();
@@ -36,5 +40,21 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCurrentUserAccount() {
         userService.deleteCurrentUserAccount();
+    }
+
+    // --- Admin Endpoints ---
+    @GetMapping("")
+    public List<UserDto> getAllUsers() {
+        return userService.listAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public UserDto getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/{id}")
+    public UserDto updateUser(@PathVariable Long id, @Valid @RequestBody AdminUserUpdateDto dto) {
+        return userService.updateUser(id, dto);
     }
 }
