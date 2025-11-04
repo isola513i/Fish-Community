@@ -9,6 +9,10 @@ HELP.md
 *.iml
 *.ipr
 
+# Environment files
+.env
+.env.*
+
 ### STS ###
 .apt_generated
 .classpath
@@ -33,9 +37,9 @@ HELP.md
 # =======================================
 backend/target/
 backend/logs/
-*.log
 application-dev.properties
 application-prod.properties
+*.log
 
 # =======================================
 # Frontend (Node.js)
