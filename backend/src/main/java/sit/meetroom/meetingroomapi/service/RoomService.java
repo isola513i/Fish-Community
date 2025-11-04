@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sit.meetroom.meetingroomapi.dto.RoomDto;
 import sit.meetroom.meetingroomapi.entity.Room;
+import sit.meetroom.meetingroomapi.mapper.RoomMapper;
 import sit.meetroom.meetingroomapi.repository.RoomRepository;
 
 import java.util.List;
@@ -12,22 +13,27 @@ import java.util.List;
 @Service @RequiredArgsConstructor
 public class RoomService {
     private final RoomRepository roomRepo;
+    private final RoomMapper roomMapper;
 
     @Transactional
-    public Room create(RoomDto dto) {
+    public RoomDto create(RoomDto dto) {
         if (roomRepo.existsByNameIgnoreCase(dto.name())) {
             throw new IllegalArgumentException("Room name already exists");
         }
-        Room r = Room.builder()
-                .name(dto.name())
-                .capacity(dto.capacity())
-                .location(dto.location())
-                .equipmentsJson(dto.equipmentsJson())
-                .isActive(dto.isActive() == null || dto.isActive())
-                .build();
-        return roomRepo.save(r);
+        Room r = roomMapper.toRoom(dto);
+        r.setIsActive(dto.isActive() == null || dto.isActive());
+
+        Room savedRoom = roomRepo.save(r);
+        return roomMapper.toRoomDto(savedRoom);
     }
 
-    public List<Room> list(){ return roomRepo.findAll(); }
-    public Room get(Long id){ return roomRepo.findById(id).orElseThrow(); }
+    public List<RoomDto> list() {
+        List<Room> rooms = roomRepo.findAll();
+        return roomMapper.toRoomDtoList(rooms);
+    }
+
+    public RoomDto get(Long id) {
+        Room room = roomRepo.findById(id).orElseThrow();
+        return roomMapper.toRoomDto(room);
+    }
 }

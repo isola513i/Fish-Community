@@ -32,11 +32,11 @@ public class Room {
     @Column(nullable=false)
     private Boolean isActive = true;
 
-    @CreationTimestamp(source = SourceType.DB)
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @UpdateTimestamp(source = SourceType.DB)
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
