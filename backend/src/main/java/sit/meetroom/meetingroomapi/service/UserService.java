@@ -12,6 +12,7 @@ import sit.meetroom.meetingroomapi.dto.UserDto;
 import sit.meetroom.meetingroomapi.entity.Booking;
 import sit.meetroom.meetingroomapi.entity.BookingStatus;
 import sit.meetroom.meetingroomapi.entity.User;
+import sit.meetroom.meetingroomapi.mapper.UserMapper;
 import sit.meetroom.meetingroomapi.repository.BookingRepository;
 import sit.meetroom.meetingroomapi.repository.UserRepository;
 
@@ -24,6 +25,7 @@ public class UserService {
     private final UserRepository userRepo;
     private final BookingRepository bookingRepo;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     private User getCurrentUser() {
         String email = SecurityUtils.currentEmail();
@@ -36,12 +38,7 @@ public class UserService {
 
     public UserDto getCurrentUserProfile() {
         User u = getCurrentUser();
-        return new UserDto(
-                u.getId(),
-                u.getFullName(),
-                u.getEmail(),
-                u.getRole().name()
-        );
+        return userMapper.toUserDto(u);
     }
 
     @Transactional
@@ -51,12 +48,7 @@ public class UserService {
         u.setTimezone(dto.timezone());
         User savedUser = userRepo.save(u);
 
-        return new UserDto(
-                savedUser.getId(),
-                savedUser.getFullName(),
-                savedUser.getEmail(),
-                savedUser.getRole().name()
-        );
+        return userMapper.toUserDto(savedUser);
     }
 
     @Transactional
