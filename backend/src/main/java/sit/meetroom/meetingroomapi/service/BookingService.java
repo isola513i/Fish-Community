@@ -13,8 +13,11 @@ import sit.meetroom.meetingroomapi.exception.BookingConflictException;
 import sit.meetroom.meetingroomapi.exception.ForbiddenException;
 import sit.meetroom.meetingroomapi.mapper.BookingMapper;
 import sit.meetroom.meetingroomapi.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.NoSuchElementException;
 
 @Service @RequiredArgsConstructor
 public class BookingService {
@@ -22,6 +25,7 @@ public class BookingService {
     private final RoomRepository roomRepo;
     private final UserRepository userRepo;
     private final BookingMapper bookingMapper;
+    private static final Logger log = LoggerFactory.getLogger(BookingService.class);
 
     private User getCurrentUser() {
         String email = SecurityUtils.currentEmail(); //
@@ -34,13 +38,23 @@ public class BookingService {
 
     @Transactional
     public BookingResponseDto create(BookingCreateDto dto) {
+        log.info("Creating booking for room {} by user {}", dto.roomId(), getCurrentUser().getEmail());
+
         if (!dto.startAt().isBefore(dto.endAt()))
             throw new IllegalArgumentException("endAt must be greater than startAt");
 
-        Room room = roomRepo.findById(dto.roomId()).orElseThrow();
+        Room room = roomRepo.findById(dto.roomId())
+                .orElseThrow(() -> {
+                    log.warn("Room not found: {}", dto.roomId());
+                    return new NoSuchElementException("Room not found with id: " + dto.roomId());
+                });
 
         boolean overlap = bookingRepo.existsOverlap(room.getId(), dto.startAt(), dto.endAt());
-        if (overlap) throw new BookingConflictException("Time slot already booked");
+        if (overlap) {
+            log.warn("Booking conflict for room {} at time {} - {}",
+                    room.getId(), dto.startAt(), dto.endAt());
+            throw new BookingConflictException("Time slot already booked");
+        }
 
         Booking b = Booking.builder()
                 .room(room)
@@ -53,6 +67,7 @@ public class BookingService {
                 .build();
 
         Booking savedBooking = bookingRepo.save(b);
+        log.info("Booking created successfully: ID {}", savedBooking.getId());
         return bookingMapper.toBookingResponseDto(savedBooking);
     }
 
@@ -80,12 +95,20 @@ public class BookingService {
 
     @Transactional
     public void cancel(Long id) {
-        Booking b = bookingRepo.findById(id).orElseThrow();
+        log.info("Cancelling booking: {}", id);
+
+        Booking b = bookingRepo.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Booking not found: {}", id);
+                    return new NoSuchElementException("Booking not found with id: " + id);
+                });
 
         checkBookingPermission(b, getCurrentUser());
 
         b.setStatus(BookingStatus.CANCELLED);
         b.setCancelledAt(Instant.now());
+
+        log.info("Booking cancelled successfully: ID {}", id);
     }
 
     private void checkBookingPermission(Booking booking, User currentUser) {
