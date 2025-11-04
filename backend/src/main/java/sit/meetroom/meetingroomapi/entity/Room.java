@@ -3,7 +3,6 @@ package sit.meetroom.meetingroomapi.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
@@ -16,13 +15,13 @@ public class Room {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false, unique=true, length=255)
+    @Column(nullable=false, unique=true)
     private String name;
 
     @Column(nullable=false)
     private Integer capacity = 1;
 
-    @Column(length=255)
+    @Column()
     private String location;
 
     @JdbcTypeCode(SqlTypes.JSON)

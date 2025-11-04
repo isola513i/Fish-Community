@@ -3,7 +3,6 @@ package sit.meetroom.meetingroomapi.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
@@ -27,7 +26,7 @@ public class Booking {
     @JoinColumn(name="user_id")
     private User user;
 
-    @Column(nullable=false, length=255)
+    @Column(nullable=false)
     private String title;
 
     @Column(nullable=false)
