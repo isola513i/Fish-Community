@@ -16,6 +16,13 @@ import java.util.List;
 public class BookingController {
     private final BookingService bookingService;
 
+    // --- Admin Endpoint ---
+    @GetMapping("/all")
+    public List<BookingResponseDto> getAllBookings() {
+        return bookingService.listAllBookings();
+    }
+
+    // --- User Endpoint ---
     @GetMapping("/my-bookings")
     public List<BookingResponseDto> getMyBookings() {
         return bookingService.listMyBookings();

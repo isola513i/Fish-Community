@@ -105,4 +105,9 @@ public class BookingService {
         return bookingMapper.toBookingResponseDtoList(bookings);
     }
 
+    // ---  Admin  ---
+    public List<BookingResponseDto> listAllBookings() {
+        List<Booking> bookings = bookingRepo.findAll();
+        return bookingMapper.toBookingResponseDtoList(bookings);
+    }
 }
