@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import sit.meetroom.meetingroomapi.entity.Booking;
+import sit.meetroom.meetingroomapi.entity.BookingStatus;
 import sit.meetroom.meetingroomapi.entity.User;
 
 import java.time.Instant;
@@ -39,6 +40,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("excludeBookingId") Long excludeBookingId,
             @Param("newStart") Instant newStart,
             @Param("newEnd") Instant newEnd
+    );
+
+    @Query("""
+  SELECT b FROM Booking b
+  WHERE b.room.id = :roomId
+    AND b.status = sit.meetroom.meetingroomapi.entity.BookingStatus.CONFIRMED
+    AND b.startAt > :currentTime
+  ORDER BY b.startAt ASC
+  """)
+    List<Booking> findFutureConfirmedBookingsByRoomId(
+            @Param("roomId") Long roomId,
+            @Param("currentTime") Instant currentTime
     );
 
     List<Booking> findAllByUserOrderByStartAtDesc(User user);
