@@ -41,6 +41,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("newEnd") Instant newEnd
     );
 
+    @Query("""
+  SELECT b FROM Booking b
+  WHERE b.room.id = :roomId
+    AND b.status = sit.meetroom.meetingroomapi.entity.BookingStatus.CONFIRMED
+    AND b.startAt > :currentTime
+  ORDER BY b.startAt ASC
+  """)
+    List<Booking> findFutureConfirmedBookingsByRoomId(
+            @Param("roomId") Long roomId,
+            @Param("currentTime") Instant currentTime
+    );
+
     List<Booking> findAllByUserOrderByStartAtDesc(User user);
 
     List<Booking> findAllByUserAndStartAtAfter(User user, Instant time);

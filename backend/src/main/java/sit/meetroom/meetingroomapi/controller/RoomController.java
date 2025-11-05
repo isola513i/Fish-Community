@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import sit.meetroom.meetingroomapi.dto.RoomDto;
 import sit.meetroom.meetingroomapi.service.RoomService;
 
-
 @RestController
 @RequestMapping("/api/rooms")
 @RequiredArgsConstructor
@@ -26,8 +25,26 @@ public class RoomController {
         return roomService.get(id);
     }
 
-    @PostMapping @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public RoomDto create(@Valid @RequestBody RoomDto dto) {
         return roomService.create(dto);
+    }
+
+    @PutMapping("/{id}")
+    public RoomDto update(@PathVariable Long id, @Valid @RequestBody RoomDto dto) {
+        return roomService.update(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        roomService.delete(id);
+    }
+
+    @DeleteMapping("/{id}/force")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void forceDelete(@PathVariable Long id) {
+        roomService.forceDelete(id);
     }
 }
