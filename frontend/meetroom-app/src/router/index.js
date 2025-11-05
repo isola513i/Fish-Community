@@ -1,30 +1,58 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from "../stores/authStore";
+import AppLayout from "../layouts/AppLayout.vue";
+import Login from "../views/Login.vue";
+import Register from "../views/Register.vue";
+import MyBooking from "../views/MyBooking.vue";
+import BookRoom from "../views/BookRoom.vue";
+import Profile from "../views/Profile.vue";
+import AdminManageRooms from "../views/admin/ManageRooms.vue";
 
 const routes = [
-	{
-		path: "/",
-		name: "Home",
-		// component: Home,
-		component: () => import("../views/MyBookings.vue"), // Lazy load
-		meta: { requiresAuth: true }, // หน้านี้ต้อง Login ก่อน
-	},
+	// --- No need to Login ---
 	{
 		path: "/login",
 		name: "Login",
-		// component: Login
-		component: () => import("../views/Login.vue"),
+		component: Login,
 		meta: { requiresAuth: false },
 	},
 	{
 		path: "/register",
 		name: "Register",
-		component: () => import("../views/Register.vue"),
+		component: Register,
 		meta: { requiresAuth: false },
 	},
-	// TODO: เพิ่ม Routes สำหรับหน้าอื่นๆ ที่นี่
-	// { path: '/book', name: 'BookRoom', ... }
-	// { path: '/profile', name: 'Profile', ... }
-	// { path: '/admin/rooms', name: 'AdminManageRooms', ... }
+
+	// --- Must to Login  ---
+	{
+		path: "/",
+		component: AppLayout,
+		meta: { requiresAuth: true },
+		children: [
+			{
+				path: "",
+				name: "MyBookings",
+				component: MyBooking,
+			},
+			{
+				path: "book",
+				name: "BookRoom",
+				component: BookRoom,
+			},
+			{
+				path: "profile",
+				name: "Profile",
+				component: Profile,
+			},
+			{
+				path: "admin/rooms",
+				name: "AdminManageRooms",
+				component: AdminManageRooms,
+				meta: { requiresAdmin: true },
+			},
+			// TODO: เพิ่มหน้าอื่นๆ ที่ต้อง Login ที่นี่
+		],
+	},
 ];
 
 const router = createRouter({
@@ -34,10 +62,21 @@ const router = createRouter({
 
 // Navigation Guard
 router.beforeEach((to, from, next) => {
-	const token = localStorage.getItem("authToken"); // (เราจะใช้ Pinia จัดการทีหลัง แต่นี่คือ Basic)
+	const authStore = useAuthStore();
+	const isLoggedIn = authStore.isLoggedIn;
+	const isAdmin = authStore.isAdmin;
 
-	if (to.meta.requiresAuth && !token) {
+	if (to.meta.requiresAuth && !isLoggedIn) {
+		authStore.returnUrl = to.fullPath;
 		next({ name: "Login" });
+	} else if (to.meta.requiresAdmin && !isAdmin) {
+		next({ name: "MyBookings" });
+	} else if (
+		!to.meta.requiresAuth &&
+		isLoggedIn &&
+		(to.name === "Login" || to.name === "Register")
+	) {
+		next({ name: "MyBookings" });
 	} else {
 		next();
 	}

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import api from "../services/api"; 
+import api from "../services/api";
 import router from "../router";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -37,11 +37,11 @@ export const useAuthStore = defineStore("auth", () => {
 
 			setAuthData(tokenRes.data, userRes.data);
 
-			router.push({ name: "Home" });
+			router.push({ name: "MyBookings" });
 		} catch (error) {
 			console.error("Login failed:", error);
 			// TODO: แสดง error message บน UI
-			throw error; 
+			throw error;
 		}
 	}
 
@@ -53,11 +53,11 @@ export const useAuthStore = defineStore("auth", () => {
 			api.defaults.headers.common[
 				"Authorization"
 			] = `Bearer ${tokenRes.data.accessToken}`;
-			const userRes = await api.get("/users/me");
 
-			setAuthData(tokenRes.data, userRes.data);
-
-			router.push({ name: "Home" });
+			router.push({
+				name: "Login",
+				query: { registered: "true" },
+			});
 		} catch (error) {
 			console.error("Register failed:", error);
 			throw error;
@@ -73,5 +73,46 @@ export const useAuthStore = defineStore("auth", () => {
 		router.push({ name: "Login" });
 	}
 
-	return { token, user, isLoggedIn, isAdmin, login, register, logout };
+	async function updateProfile(newFullName) {
+		try {
+			const profileDto = {
+				fullName: newFullName,
+				timezone: user.value.timezone || "Asia/Bangkok",
+			};
+
+			const res = await api.put("/users/me", profileDto);
+
+			user.value = res.data;
+			localStorage.setItem("authUser", JSON.stringify(res.data));
+		} catch (error) {
+			console.error("Update profile failed:", error);
+			throw error;
+		}
+	}
+
+	async function changePassword(oldPass, newPass) {
+		try {
+			const passwordDto = {
+				oldPassword: oldPass,
+				newPassword: newPass,
+			};
+
+			await api.put("/users/me/change-password", passwordDto);
+		} catch (error) {
+			console.error("Change password failed:", error);
+			throw error;
+		}
+	}
+
+	return {
+		token,
+		user,
+		isLoggedIn,
+		isAdmin,
+		login,
+		register,
+		logout,
+		updateProfile,
+		changePassword,
+	};
 });
