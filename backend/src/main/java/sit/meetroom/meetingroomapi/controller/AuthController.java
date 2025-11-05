@@ -10,7 +10,7 @@ import sit.meetroom.meetingroomapi.dto.TokenResponse;
 import sit.meetroom.meetingroomapi.service.AuthService; // ⬅️ Import Service ใหม่
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
