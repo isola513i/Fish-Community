@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import sit.meetroom.meetingroomapi.entity.Booking;
-import sit.meetroom.meetingroomapi.entity.BookingStatus;
 import sit.meetroom.meetingroomapi.entity.User;
 
 import java.time.Instant;
