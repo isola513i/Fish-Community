@@ -5,17 +5,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sit.meetroom.meetingroomapi.dto.AdminRoomDto;
 import sit.meetroom.meetingroomapi.dto.RoomDto;
 import sit.meetroom.meetingroomapi.entity.Booking;
 import sit.meetroom.meetingroomapi.entity.BookingStatus;
 import sit.meetroom.meetingroomapi.entity.Room;
+import sit.meetroom.meetingroomapi.mapper.BookingMapper;
 import sit.meetroom.meetingroomapi.mapper.RoomMapper;
 import sit.meetroom.meetingroomapi.repository.BookingRepository;
 import sit.meetroom.meetingroomapi.repository.RoomRepository;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class RoomService {
     private final RoomRepository roomRepo;
     private final RoomMapper roomMapper;
     private final BookingRepository bookingRepo;
+    private final BookingMapper bookingMapper;
 
     @Transactional
     public RoomDto create(RoomDto dto) {
@@ -78,7 +81,6 @@ public class RoomService {
             );
         }
 
-        // Soft delete by setting isActive to false
         room.setIsActive(false);
         roomRepo.save(room);
     }
@@ -88,7 +90,6 @@ public class RoomService {
         Room room = roomRepo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Room not found with id: " + id));
 
-        // Cancel all future bookings
         List<Booking> futureBookings = bookingRepo.findFutureConfirmedBookingsByRoomId(
                 id, Instant.now()
         );
@@ -115,9 +116,52 @@ public class RoomService {
         return roomPage.map(roomMapper::toRoomDto);
     }
 
+    public List<RoomDto> findAvailableRooms(Instant startAt, Instant endAt) {
+        Set<Long> bookedRoomIds = bookingRepo.findBookedRoomIdsBetween(startAt, endAt);
+
+        List<Room> allActiveRooms = roomRepo.findAllByIsActiveTrue(Pageable.unpaged()).getContent();
+
+        List<Room> availableRooms = allActiveRooms.stream()
+                .filter(room -> !bookedRoomIds.contains(room.getId()))
+                .collect(Collectors.toList());
+
+        return roomMapper.toRoomDtoList(availableRooms);
+    }
+
     public RoomDto get(Long id) {
         Room room = roomRepo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Room not found with id: " + id));
         return roomMapper.toRoomDto(room);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminRoomDto> listRoomsWithBookingStatus() {
+        // 1. ดึงห้องทั้งหมด (ไม่สน page)
+        List<Room> allRooms = roomRepo.findAll();
+
+        // 2. ดึงการจอง "ทั้งหมด" ที่ยัง Active และยังไม่สิ้นสุด
+        List<Booking> futureBookings = bookingRepo.findAllCurrentAndFutureBookings(Instant.now());
+
+        // 3. (สำคัญ) Group การจองด้วย Room ID
+        // และหาการจองที่ "ใกล้ที่สุด" (startAt น้อยสุด) ของแต่ละห้อง
+        Map<Long, Booking> nextBookingByRoomId = futureBookings.stream()
+                .collect(Collectors.groupingBy(
+                        booking -> booking.getRoom().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.minBy(Comparator.comparing(Booking::getStartAt)),
+                                optionalBooking -> optionalBooking.orElse(null)
+                        )
+                ));
+
+        // 4. ประกอบร่าง DTO
+        return allRooms.stream()
+                .map(room -> new AdminRoomDto(
+                        roomMapper.toRoomDto(room),
+                        bookingMapper.toBookingResponseDto(
+                                nextBookingByRoomId.get(room.getId()) // อาจจะเป็น null
+                        )
+                ))
+                .sorted(Comparator.comparing(dto -> dto.room().name())) // เรียงตามชื่อห้อง
+                .collect(Collectors.toList());
     }
 }

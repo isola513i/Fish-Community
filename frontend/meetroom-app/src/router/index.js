@@ -9,6 +9,9 @@ import Profile from '../views/Profile.vue';
 import AdminManageRooms from '../views/admin/ManageRooms.vue';
 import EditProfile from '../views/EditProfile.vue';
 import ChangePassword from '../views/ChangePassword.vue';
+import CreateRoom from '../views/admin/CreateRoom.vue';
+import ManageRooms from '../views/admin/ManageRooms.vue';
+import EditRoom from '../views/admin/EditRoom.vue';
 
 const routes = [
   // --- No need to Login ---
@@ -59,10 +62,22 @@ const routes = [
       {
         path: 'admin/rooms',
         name: 'AdminManageRooms',
-        component: AdminManageRooms,
+        component: ManageRooms,
         meta: { requiresAdmin: true },
       },
-      // TODO: เพิ่มหน้าอื่นๆ ที่ต้อง Login ที่นี่
+      {
+        path: 'admin/rooms/create',
+        name: 'AdminCreateRoom',
+        component: CreateRoom,
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
+      {
+        path: 'admin/rooms/edit/:id',
+        name: 'AdminEditRoom',
+        component: EditRoom,
+        meta: { requiresAuth: true, requiresAdmin: true },
+        props: true,
+      },
     ],
   },
 ];
