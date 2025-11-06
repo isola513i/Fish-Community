@@ -80,7 +80,7 @@ const formatTime = (isoString) => {
           </div>
           <RouterLink
             :to="`/admin/rooms/edit/${item.room.id}`"
-            class="p-2 text-gray-600 rounded-lg hover:bg-white flex-shrink-0"
+            class="p-2 text-gray-600 rounded-lg hover:bg-white shrink-0"
           >
             <PencilIcon class="w-5 h-5" />
           </RouterLink>

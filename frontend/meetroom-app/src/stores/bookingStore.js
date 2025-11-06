@@ -20,6 +20,28 @@ export const useBookingStore = defineStore("booking", () => {
 		}
 	}
 
+	async function getBookingById(id) {
+		if (myBookings.value.length === 0) {
+			await fetchMyBookings();
+		}
+		return myBookings.value.find((b) => b.id === id);
+	}
+
+	async function updateBooking(id, bookingData) {
+		try {
+			const response = await api.put(`/bookings/${id}`, bookingData);
+			const index = myBookings.value.findIndex((b) => b.id === id);
+			if (index !== -1) {
+				myBookings.value[index] = response.data;
+			}
+
+			router.push({ name: "MyBookings" });
+		} catch (error) {
+			console.error("Failed to update booking:", error);
+			throw error;
+		}
+	}
+
 	async function cancelBooking(id) {
 		try {
 			await api.delete(`/bookings/${id}`);
@@ -48,5 +70,7 @@ export const useBookingStore = defineStore("booking", () => {
 		fetchMyBookings,
 		cancelBooking,
 		createBooking,
+		getBookingById,
+		updateBooking,
 	};
 });
