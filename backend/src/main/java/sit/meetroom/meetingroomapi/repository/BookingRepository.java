@@ -53,12 +53,28 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("roomId") Long roomId,
             @Param("currentTime") Instant currentTime
     );
+    
+    @Override
+    @Query(value = "SELECT b FROM Booking b LEFT JOIN FETCH b.user u LEFT JOIN FETCH b.room r",
+            countQuery = "SELECT COUNT(b) FROM Booking b")
+    Page<Booking> findAll(Pageable pageable);
+
 
     List<Booking> findAllByUserOrderByStartAtDesc(User user);
 
     List<Booking> findAllByUserAndStartAtAfter(User user, Instant time);
 
-    Page<Booking> findAllByUserOrderByStartAtDesc(User user, Pageable pageable);
+    @Query(value = """
+            SELECT b FROM Booking b
+            LEFT JOIN FETCH b.user u
+            LEFT JOIN FETCH b.room r
+            WHERE b.user = :user
+            """,
+            countQuery = """
+            SELECT COUNT(b) FROM Booking b
+            WHERE b.user = :user
+            """)
+    Page<Booking> findAllByUserOrderByStartAtDesc(@Param("user") User user, Pageable pageable);
 
     @Query("""
     SELECT DISTINCT b.room.id
