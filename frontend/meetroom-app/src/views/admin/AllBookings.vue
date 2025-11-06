@@ -95,7 +95,7 @@ const pastBookings = computed(() =>
 		</div>
 
 		<div v-if="isLoading" class="pt-10 text-center text-gray-600">
-			<SkeletonCard v-for="n in 3" :key="n" />
+			Loading...
 		</div>
 		<div
 			v-if="!isLoading && allBookings.length === 0"

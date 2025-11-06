@@ -42,7 +42,7 @@ const formatTime = (isoString) => {
 		<h1 class="text-3xl font-bold text-gray-900">Manage Rooms</h1>
 
 		<div v-if="isLoading" class="text-center">
-			<SkeletonCard v-for="n in 3" :key="n" />
+      Loading..
 		</div>
 
 		<div v-if="!isLoading" class="space-y-4">
