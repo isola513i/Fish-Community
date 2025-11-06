@@ -55,7 +55,7 @@ const handleSubmit = async () => {
 		<div class="relative flex items-center justify-center">
 			<RouterLink
 				to="/admin/users"
-				class="absolute left-0 p-2 rounded-full bg-soft-bg shadow-neumorphism hover:shadow-neumorphism-inset"
+				class="absolute left-0 p-2 text-gray-700 hover:opacity-70"
 			>
 				<ArrowLeftIcon class="w-6 h-6 text-gray-700" />
 			</RouterLink>

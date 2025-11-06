@@ -87,7 +87,7 @@ const pastBookings = computed(() =>
 		<div class="relative flex items-center justify-center">
 			<RouterLink
 				to="/profile"
-				class="absolute left-0 p-2 rounded-full bg-soft-bg shadow-neumorphism hover:shadow-neumorphism-inset"
+				class="absolute left-0 p-2 text-gray-700 hover:opacity-70"
 			>
 				<ArrowLeftIcon class="w-6 h-6 text-gray-700" />
 			</RouterLink>
@@ -95,7 +95,7 @@ const pastBookings = computed(() =>
 		</div>
 
 		<div v-if="isLoading" class="pt-10 text-center text-gray-600">
-			Loading all bookings...
+			<SkeletonCard v-for="n in 3" :key="n" />
 		</div>
 		<div
 			v-if="!isLoading && allBookings.length === 0"

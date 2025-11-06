@@ -8,6 +8,7 @@ import { DatePicker } from "v-calendar";
 import "v-calendar/style.css";
 import { Toaster, toast } from "vue-sonner";
 import "vue-sonner/style.css";
+import SkeletonCard from "../components/SkeletonCard.vue";
 
 const isSubmitting = ref(false);
 const OPEN_MIN = 8 * 60; // 08:00
@@ -418,7 +419,7 @@ const handleConfirmBooking = async () => {
 			<h2 class="text-xl font-bold text-gray-900 mb-4">Rooms</h2>
 
 			<div v-if="isLoading" class="text-center text-gray-600">
-				กำลังค้นหาห้องว่าง…
+				<SkeletonCard v-for="n in 3" :key="n" />
 			</div>
 
 			<div v-else-if="!isValidRange" class="text-center text-gray-600">

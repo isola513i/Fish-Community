@@ -1,10 +1,17 @@
+body {
+	font-family: "Inter", sans-serif;
+	-webkit-font-smoothing: antialiased; /* (ทำให้อักษรคมชัดขึ้น) */
+	-moz-osx-font-smoothing: grayscale; /* (ทำให้อักษรคมชัดขึ้น) */
+}
+
 @import "tailwindcss";
 
 @theme {
-  --color-soft-bg: #F0F5FA;
-  --color-soft-shadow-dark: #D1D9E6;
-  --color-soft-shadow-light: #FFFFFF;
-  
-  --shadow-neumorphism: 8px 8px 16px #D1D9E6, -8px -8px 16px #FFFFFF;
-  --shadow-neumorphism-inset: inset 8px 8px 16px #D1D9E6, inset -8px -8px 16px #FFFFFF;
+	--color-soft-bg: #f0f5fa;
+	--color-soft-shadow-dark: #d1d9e6;
+	--color-soft-shadow-light: #ffffff;
+
+	--shadow-neumorphism: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
+	--shadow-neumorphism-inset: inset 8px 8px 16px #d1d9e6,
+		inset -8px -8px 16px #ffffff;
 }

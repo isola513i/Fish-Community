@@ -4,6 +4,7 @@ import { useBookingStore } from "../stores/bookingStore";
 import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import { CalendarDaysIcon, PencilIcon } from "@heroicons/vue/24/outline";
+import SkeletonCard from "../components/SkeletonCard.vue"; // ⬅️ 1. Import Skeleton
 
 const bookingStore = useBookingStore();
 const { myBookings, isLoading } = storeToRefs(bookingStore);
@@ -12,47 +13,31 @@ onMounted(() => {
 	bookingStore.fetchMyBookings();
 });
 
-const handleCancel = async (id) => {
-	if (confirm("Are you sure you want to cancel this booking?")) {
-		await bookingStore.cancelBooking(id);
-	}
-};
-
-// --- Helpers ---
+// --- (Helpers และ Computed ... เหมือนเดิม) ---
 const now = new Date();
-
-// Helper สำหรับจัดรูปแบบวันที่
 const formatMonth = (isoString) => {
 	if (!isoString) return "";
 	return new Date(isoString).toLocaleString("en-US", { month: "short" });
 };
-
 const formatDay = (isoString) => {
 	if (!isoString) return "";
 	return new Date(isoString).getDate();
 };
-
 const formatTimeRange = (startIso, endIso) => {
-	const options = { timeStyle: "short", hour12: true }; // e.g., "9:00 AM"
+	const options = { timeStyle: "short", hour12: true };
 	const startTime = new Date(startIso).toLocaleTimeString("en-US", options);
 	const endTime = new Date(endIso).toLocaleTimeString("en-US", options);
 	return `${startTime} - ${endTime}`;
 };
-
-// --- Computed Properties ---
-
-const upcomingBookings = computed(
-	() =>
-		myBookings.value
-			.filter((b) => new Date(b.endAt) > now && b.status === "CONFIRMED")
-			.sort((a, b) => new Date(a.startAt) - new Date(b.startAt)) // เรียงจากใกล้สุดไปไกลสุด
+const upcomingBookings = computed(() =>
+	myBookings.value
+		.filter((b) => new Date(b.endAt) > now && b.status === "CONFIRMED")
+		.sort((a, b) => new Date(a.startAt) - new Date(b.startAt))
 );
-
-const pastBookings = computed(
-	() =>
-		myBookings.value
-			.filter((b) => new Date(b.endAt) <= now || b.status === "CANCELLED")
-			.sort((a, b) => new Date(b.startAt) - new Date(a.startAt)) // เรียงจากล่าสุดไปเก่าสุด
+const pastBookings = computed(() =>
+	myBookings.value
+		.filter((b) => new Date(b.endAt) <= now || b.status === "CANCELLED")
+		.sort((a, b) => new Date(b.startAt) - new Date(a.startAt))
 );
 </script>
 
@@ -60,10 +45,9 @@ const pastBookings = computed(
 	<div class="p-4 space-y-6 pb-20">
 		<h1 class="text-3xl font-bold text-gray-900">My Bookings</h1>
 
-		<div v-if="isLoading" class="pt-10 text-center text-gray-600">
-			Loading bookings...
+		<div v-if="isLoading" class="pt-2 space-y-4">
+			<SkeletonCard v-for="n in 3" :key="n" />
 		</div>
-
 		<div
 			v-if="!isLoading && myBookings.length === 0"
 			class="p-6 mt-10 text-center text-gray-600 bg-soft-bg rounded-2xl shadow-neumorphism"
@@ -86,7 +70,6 @@ const pastBookings = computed(
 		<div v-if="!isLoading && myBookings.length > 0" class="space-y-8">
 			<div v-if="upcomingBookings.length > 0" class="space-y-4">
 				<h2 class="text-xl font-semibold text-gray-800">Upcoming</h2>
-
 				<div
 					v-for="booking in upcomingBookings"
 					:key="booking.id"
@@ -103,7 +86,6 @@ const pastBookings = computed(
 								formatDay(booking.startAt)
 							}}</span>
 						</div>
-
 						<div class="grow min-w-0">
 							<h2 class="text-lg font-semibold text-blue-700 truncate">
 								{{ booking.title }}
@@ -113,7 +95,6 @@ const pastBookings = computed(
 								{{ formatTimeRange(booking.startAt, booking.endAt) }}
 							</p>
 						</div>
-
 						<RouterLink
 							:to="{ name: 'EditBooking', params: { id: booking.id } }"
 							class="shrink-0 p-2 text-gray-600 rounded-lg hover:bg-white"
@@ -126,7 +107,6 @@ const pastBookings = computed(
 
 			<div v-if="pastBookings.length > 0" class="space-y-4">
 				<h2 class="text-xl font-semibold text-gray-800">Past & Cancelled</h2>
-
 				<div
 					v-for="booking in pastBookings"
 					:key="booking.id"
@@ -143,7 +123,6 @@ const pastBookings = computed(
 								formatDay(booking.startAt)
 							}}</span>
 						</div>
-
 						<div class="grow min-w-0">
 							<h2 class="text-lg font-semibold text-gray-600 truncate">
 								{{ booking.title }}
@@ -154,7 +133,6 @@ const pastBookings = computed(
 							</p>
 						</div>
 					</div>
-
 					<p
 						v-if="booking.status === 'CANCELLED'"
 						class="mt-3 text-sm font-bold text-red-600"
