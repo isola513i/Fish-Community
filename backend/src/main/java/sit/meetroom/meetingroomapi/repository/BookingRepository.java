@@ -10,6 +10,7 @@ import sit.meetroom.meetingroomapi.entity.User;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
@@ -58,4 +59,24 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByUserAndStartAtAfter(User user, Instant time);
 
     Page<Booking> findAllByUserOrderByStartAtDesc(User user, Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT b.room.id
+    FROM Booking b
+    WHERE b.status = sit.meetroom.meetingroomapi.entity.BookingStatus.CONFIRMED
+      AND b.startAt < :newEnd
+      AND b.endAt   > :newStart
+    """)
+    Set<Long> findBookedRoomIdsBetween(
+            @Param("newStart") Instant newStart,
+            @Param("newEnd") Instant newEnd
+    );
+
+    @Query("""
+    SELECT b FROM Booking b
+    WHERE b.status = sit.meetroom.meetingroomapi.entity.BookingStatus.CONFIRMED
+      AND b.endAt > :currentTime
+    ORDER BY b.startAt ASC
+    """)
+    List<Booking> findAllCurrentAndFutureBookings(@Param("currentTime") Instant currentTime);
 }

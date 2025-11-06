@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
 
                         // Admin Features
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/admin-list").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/rooms").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/rooms/**").hasRole("ADMIN")
