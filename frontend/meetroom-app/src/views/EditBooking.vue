@@ -380,7 +380,7 @@ watch(endTime, (newEnd) => {
 
 	<div
 		v-if="showCancelModal"
-		class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 supports-[backdrop-filter]:backdrop-blur-[1.5px]"
+		class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 supports-backdrop-filter:backdrop-blur-[1.5px]"
 	>
 		<div
 			class="w-full max-w-sm p-6 mx-4 rounded-2xl bg-white/95 ring-1 ring-black/5 shadow-xl"

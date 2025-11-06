@@ -5,6 +5,7 @@ import router from "../router";
 
 export const useBookingStore = defineStore("booking", () => {
 	const myBookings = ref([]);
+	const allBookings = ref([]);
 	const isLoading = ref(false);
 
 	async function fetchMyBookings() {
@@ -25,6 +26,22 @@ export const useBookingStore = defineStore("booking", () => {
 			await fetchMyBookings();
 		}
 		return myBookings.value.find((b) => b.id === id);
+	}
+
+	async function fetchAllBookings() {
+		isLoading.value = true;
+		try {
+			// API: GET /api/bookings/all
+			const response = await api.get(
+				"/bookings/all?size=100&sort=startAt,desc"
+			);
+			allBookings.value = response.data.content;
+		} catch (error) {
+			console.error("Failed to fetch all bookings:", error);
+			allBookings.value = [];
+		} finally {
+			isLoading.value = false;
+		}
 	}
 
 	async function updateBooking(id, bookingData) {
@@ -67,6 +84,8 @@ export const useBookingStore = defineStore("booking", () => {
 	return {
 		myBookings,
 		isLoading,
+		allBookings,
+		fetchAllBookings,
 		fetchMyBookings,
 		cancelBooking,
 		createBooking,

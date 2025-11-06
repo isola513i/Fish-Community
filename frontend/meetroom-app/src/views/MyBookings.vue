@@ -134,7 +134,7 @@ const pastBookings = computed(
 				>
 					<div class="flex items-center gap-4">
 						<div
-							class="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 bg-white rounded-lg shadow-sm"
+							class="shrink-0 flex flex-col items-center justify-center w-16 h-16 bg-white rounded-lg shadow-sm"
 						>
 							<span class="text-xs font-semibold text-gray-500 uppercase">{{
 								formatMonth(booking.startAt)
@@ -144,7 +144,7 @@ const pastBookings = computed(
 							}}</span>
 						</div>
 
-						<div class="flex-grow min-w-0">
+						<div class="grow min-w-0">
 							<h2 class="text-lg font-semibold text-gray-600 truncate">
 								{{ booking.title }}
 							</h2>
