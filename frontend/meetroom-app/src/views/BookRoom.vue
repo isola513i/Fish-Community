@@ -303,9 +303,6 @@ const handleConfirmBooking = async () => {
 				<span v-if="dayClosed" class="text-xs text-red-600"
 					>หมดเวลาจองสำหรับวันนี้แล้ว</span
 				>
-				<span v-else class="text-[11px] text-gray-500"
-					>เปิดจอง 08:00 – 22:00</span
-				>
 			</div>
 
 			<div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
@@ -326,7 +323,6 @@ const handleConfirmBooking = async () => {
 							@change="onStartInput"
 							class="h-10 w-full rounded-lg border border-gray-200 bg-white pl-3 pr-8 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
 						/>
-						<!-- ⏰ แสดงเฉพาะตอนหมดเวลา -->
 						<svg
 							v-if="dayClosed"
 							class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
@@ -424,57 +420,73 @@ const handleConfirmBooking = async () => {
 			<div v-if="isLoading" class="text-center text-gray-600">
 				กำลังค้นหาห้องว่าง…
 			</div>
+
 			<div v-else-if="!isValidRange" class="text-center text-gray-600">
 				กรุณาเลือกช่วงเวลาที่ถูกต้อง
 			</div>
-			<div
-				v-else-if="availableRooms.length === 0"
-				class="text-center text-gray-600"
-			>
-				ไม่มีห้องว่างสำหรับ {{ startTime }}–{{ endTime }} ({{ formattedDate }})
-			</div>
 
-			<div v-else class="space-y-4">
-				<div
-					v-for="room in allRooms"
-					:key="room.id"
-					:id="`room-${room.id}`"
-					@click="
-						isRoomAvailable(room.id) && isValidRange
-							? openBookingModal(room)
-							: null
-					"
-					:class="[
-						'p-4 rounded-2xl transition-all ring-1',
-						isRoomAvailable(room.id) && isValidRange
-							? 'bg-white ring-gray-200 hover:ring-blue-300 cursor-pointer'
-							: 'bg-gray-100 ring-gray-200 opacity-60 cursor-not-allowed',
-					]"
-				>
-					<h2
-						class="text-lg font-semibold"
+			<div v-else>
+				<div v-if="allRooms.length === 0" class="text-center text-gray-600">
+					(ยังไม่มีห้องในระบบ)
+				</div>
+
+				<div v-else class="space-y-4">
+					<div
+						v-for="room in allRooms"
+						:key="room.id"
+						:id="`room-${room.id}`"
+						@click="
+							room.isActive && isRoomAvailable(room.id) && isValidRange
+								? openBookingModal(room)
+								: null
+						"
 						:class="[
-							isRoomAvailable(room.id) ? 'text-blue-700' : 'text-gray-600',
+							'p-4 rounded-2xl transition-all ring-1',
+							room.isActive && isRoomAvailable(room.id) && isValidRange
+								? 'bg-white ring-gray-200 hover:ring-blue-300 cursor-pointer'
+								: 'bg-gray-100 ring-gray-200 opacity-60 cursor-not-allowed',
 						]"
 					>
-						{{ room.name }}
-					</h2>
-					<span
-						v-if="!isRoomAvailable(room.id)"
-						class="text-sm font-bold text-red-600"
-						>(Booked)</span
-					>
+						<h2
+							class="text-lg font-semibold"
+							:class="[
+								room.isActive && isRoomAvailable(room.id)
+									? 'text-blue-700'
+									: 'text-gray-600',
+							]"
+						>
+							{{ room.name }}
+						</h2>
 
-					<div class="flex items-center mt-2 text-sm text-gray-600">
-						<UsersIcon class="w-4 h-4 mr-2" />
-						<span>Capacity: {{ room.capacity }}</span>
+						<span v-if="!room.isActive" class="text-sm font-bold text-gray-500">
+							(Unavailable)
+						</span>
+						<span
+							v-else-if="!isRoomAvailable(room.id)"
+							class="text-sm font-bold text-red-600"
+						>
+							(Booked)
+						</span>
+						<div class="flex items-center mt-2 text-sm text-gray-600">
+							<UsersIcon class="w-4 h-4 mr-2" />
+							<span>Capacity: {{ room.capacity }}</span>
+						</div>
+						<div
+							v-if="room.location"
+							class="flex items-center mt-1 text-sm text-gray-600"
+						>
+							<MapPinIcon class="w-4 h-4 mr-2" />
+							<span>{{ room.location }}</span>
+						</div>
 					</div>
+
 					<div
-						v-if="room.location"
-						class="flex items-center mt-1 text-sm text-gray-600"
+						v-if="availableRooms.length === 0"
+						class="pt-2 text-center text-gray-600"
 					>
-						<MapPinIcon class="w-4 h-4 mr-2" />
-						<span>{{ room.location }}</span>
+						ไม่มีห้องว่างสำหรับ {{ startTime }}–{{ endTime }} ({{
+							formattedDate
+						}})
 					</div>
 				</div>
 			</div>
@@ -482,7 +494,7 @@ const handleConfirmBooking = async () => {
 	</div>
 	<div
 		v-if="showModal"
-		class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 supports-[backdrop-filter]:backdrop-blur-[1.5px]"
+		class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 supports-backdrop-filter:backdrop-blur-[1.5px]"
 	>
 		<div
 			class="w-full max-w-sm p-6 mx-4 rounded-2xl bg-white/95 ring-1 ring-black/5 shadow-xl"
