@@ -18,14 +18,16 @@ onMounted(() => {
 		<div class="relative flex items-center justify-center">
 			<RouterLink
 				to="/profile"
-				class="absolute left-0 p-2 rounded-full bg-soft-bg shadow-neumorphism hover:shadow-neumorphism-inset"
+				class="absolute left-0 p-2 text-gray-700 hover:opacity-70"
 			>
 				<ArrowLeftIcon class="w-6 h-6 text-gray-700" />
 			</RouterLink>
 			<h1 class="text-xl font-bold text-gray-900">Manage Users</h1>
 		</div>
 
-		<div v-if="isLoading" class="text-center">Loading users...</div>
+		<div v-if="isLoading" class="text-center">
+			<SkeletonCard v-for="n in 3" :key="n" />
+		</div>
 
 		<div v-if="!isLoading" class="space-y-4">
 			<div
