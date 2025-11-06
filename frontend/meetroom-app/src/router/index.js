@@ -6,13 +6,15 @@ import Register from "../views/Register.vue";
 import MyBookings from "../views/MyBookings.vue";
 import BookRoom from "../views/BookRoom.vue";
 import Profile from "../views/Profile.vue";
-import AdminManageRooms from "../views/admin/ManageRooms.vue";
 import EditProfile from "../views/EditProfile.vue";
 import ChangePassword from "../views/ChangePassword.vue";
 import CreateRoom from "../views/admin/CreateRoom.vue";
 import ManageRooms from "../views/admin/ManageRooms.vue";
 import EditRoom from "../views/admin/EditRoom.vue";
 import EditBooking from "../views/EditBooking.vue";
+import AdminManageUsers from "../views/admin/AdminManageUsers.vue";
+import AdminEditUser from "../views/admin/AdminEditUser.vue";
+import AllBookings from "../views/admin/AllBookings.vue";
 
 const routes = [
 	// --- No need to Login ---
@@ -85,6 +87,25 @@ const routes = [
 				component: EditRoom,
 				meta: { requiresAuth: true, requiresAdmin: true },
 				props: true,
+			},
+			{
+				path: "admin/users",
+				name: "AdminManageUsers",
+				component: AdminManageUsers,
+				meta: { requiresAuth: true, requiresAdmin: true },
+			},
+			{
+				path: "admin/users/edit/:id",
+				name: "AdminEditUser",
+				component: AdminEditUser,
+				meta: { requiresAuth: true, requiresAdmin: true },
+				props: true,
+			},
+			{
+				path: "admin/bookings",
+				name: "AdminAllBookings",
+				component: AllBookings,
+				meta: { requiresAuth: true, requiresAdmin: true },
 			},
 		],
 	},
