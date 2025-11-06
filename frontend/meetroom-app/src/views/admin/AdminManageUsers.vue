@@ -25,9 +25,7 @@ onMounted(() => {
 			<h1 class="text-xl font-bold text-gray-900">Manage Users</h1>
 		</div>
 
-		<div v-if="isLoading" class="text-center">
-			<SkeletonCard v-for="n in 3" :key="n" />
-		</div>
+		<div v-if="isLoading" class="text-center">Loading...</div>
 
 		<div v-if="!isLoading" class="space-y-4">
 			<div
