@@ -15,3 +15,13 @@ body {
 	--shadow-neumorphism-inset: inset 8px 8px 16px #d1d9e6,
 		inset -8px -8px 16px #ffffff;
 }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+
+  opacity: 0;
+}

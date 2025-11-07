@@ -1,118 +1,131 @@
-import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import api from "../services/api";
-import router from "../router";
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import api from '../services/api';
+import router from '../router';
 
-export const useAuthStore = defineStore("auth", () => {
-	// === State ===
-	const token = ref(localStorage.getItem("authToken") || null);
-	const user = ref(JSON.parse(localStorage.getItem("authUser")) || null);
+export const useAuthStore = defineStore('auth', () => {
+  // === State ===
+  const token = ref(localStorage.getItem('authToken') || null);
+  const user = ref(JSON.parse(localStorage.getItem('authUser')) || null);
 
-	// === Getters ===
-	const isLoggedIn = computed(() => !!token.value);
-	const isAdmin = computed(() => user.value?.role === "ADMIN");
+  // === Getters ===
+  const isLoggedIn = computed(() => !!token.value);
+  const isAdmin = computed(() => user.value?.role === 'ADMIN');
 
-	// === Actions ===
-	function setAuthData(tokenResponse, userResponse) {
-		token.value = tokenResponse.accessToken;
-		user.value = userResponse;
+  // === Actions ===
+  function setAuthData(tokenResponse, userResponse) {
+    token.value = tokenResponse.accessToken;
+    user.value = userResponse;
 
-		localStorage.setItem("authToken", tokenResponse.accessToken);
-		localStorage.setItem("authUser", JSON.stringify(userResponse));
+    localStorage.setItem('authToken', tokenResponse.accessToken);
+    localStorage.setItem('authUser', JSON.stringify(userResponse));
 
-		api.defaults.headers.common[
-			"Authorization"
-		] = `Bearer ${tokenResponse.accessToken}`;
-	}
+    api.defaults.headers.common[
+      'Authorization'
+    ] = `Bearer ${tokenResponse.accessToken}`;
+  }
 
-	async function login(email, password) {
-		try {
-			const loginReq = { email, password };
-			const tokenRes = await api.post("/auth/login", loginReq);
+  async function login(email, password) {
+    try {
+      const loginReq = { email, password };
+      const tokenRes = await api.post('/auth/login', loginReq);
 
-			api.defaults.headers.common[
-				"Authorization"
-			] = `Bearer ${tokenRes.data.accessToken}`;
-			const userRes = await api.get("/users/me");
+      api.defaults.headers.common[
+        'Authorization'
+      ] = `Bearer ${tokenRes.data.accessToken}`;
+      const userRes = await api.get('/users/me');
 
-			setAuthData(tokenRes.data, userRes.data);
+      setAuthData(tokenRes.data, userRes.data);
 
-			router.push({ name: "MyBookings" });
-		} catch (error) {
-			console.error("Login failed:", error);
-			// TODO: แสดง error message บน UI
-			throw error;
-		}
-	}
+      router.push({ name: 'MyBookings' });
+    } catch (error) {
+      console.error('Login failed:', error);
+      // TODO: แสดง error message บน UI
+      throw error;
+    }
+  }
 
-	async function register(fullName, email, password) {
-		try {
-			const registerReq = { fullName, email, password, isAdmin: false };
-			const tokenRes = await api.post("/auth/register", registerReq);
+  async function register(fullName, email, password) {
+    try {
+      const registerReq = { fullName, email, password, isAdmin: false };
+      const tokenRes = await api.post('/auth/register', registerReq);
 
-			api.defaults.headers.common[
-				"Authorization"
-			] = `Bearer ${tokenRes.data.accessToken}`;
+      api.defaults.headers.common[
+        'Authorization'
+      ] = `Bearer ${tokenRes.data.accessToken}`;
 
-			router.push({
-				name: "Login",
-				query: { registered: "true" },
-			});
-		} catch (error) {
-			console.error("Register failed:", error);
-			throw error;
-		}
-	}
+      router.push({
+        name: 'Login',
+        query: { registered: 'true' },
+      });
+    } catch (error) {
+      console.error('Register failed:', error);
+      throw error;
+    }
+  }
 
-	function logout() {
-		token.value = null;
-		user.value = null;
-		localStorage.removeItem("authToken");
-		localStorage.removeItem("authUser");
-		delete api.defaults.headers.common["Authorization"];
-		router.push({ name: "Login" });
-	}
+  function logout() {
+    token.value = null;
+    user.value = null;
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    delete api.defaults.headers.common['Authorization'];
+    router.push({ name: 'Login' });
+  }
 
-	async function updateProfile(newFullName) {
-		try {
-			const profileDto = {
-				fullName: newFullName,
-				timezone: user.value.timezone || "Asia/Bangkok",
-			};
+  async function updateProfile(newFullName) {
+    // 1. สำรองข้อมูลเก่าไว้ (สำคัญมาก)
+    const oldUser = JSON.parse(JSON.stringify(user.value)); // ใช้ deep copy
 
-			const res = await api.put("/users/me", profileDto);
+    // 2. [OPTIMISTIC] อัปเดต State และ localStorage ทันที
+    user.value.fullName = newFullName;
+    localStorage.setItem('authUser', JSON.stringify(user.value));
 
-			user.value = res.data;
-			localStorage.setItem("authUser", JSON.stringify(res.data));
-		} catch (error) {
-			console.error("Update profile failed:", error);
-			throw error;
-		}
-	}
+    try {
+      // 3. เตรียม DTO และเรียก API ในเบื้องหลัง
+      const profileDto = {
+        fullName: newFullName,
+        timezone: user.value.timezone || 'Asia/Bangkok',
+      };
+      const res = await api.put('/users/me', profileDto);
 
-	async function changePassword(oldPass, newPass) {
-		try {
-			const passwordDto = {
-				oldPassword: oldPass,
-				newPassword: newPass,
-			};
+      // 4. (ทางเลือก) เมื่อสำเร็จ อาจจะอัปเดต state ด้วยข้อมูลจริงจาก server
+      // เผื่อ server มีการคำนวณ field อื่นๆ (เช่น updatedAt)
+      user.value = res.data;
+      localStorage.setItem('authUser', JSON.stringify(res.data));
+    } catch (error) {
+      // 5. [ROLLBACK] ถ้าล้มเหลว ย้อนกลับไปใช้ข้อมูลเก่า
+      console.error('Update profile failed, rolling back:', error);
+      user.value = oldUser;
+      localStorage.setItem('authUser', JSON.stringify(oldUser));
 
-			await api.put("/users/me/change-password", passwordDto);
-		} catch (error) {
-			console.error("Change password failed:", error);
-			throw error;
-		}
-	}
+      throw error; // ส่ง error ต่อไปให้ Component
+    }
+  }
 
-	return {
-		token,
-		user,
-		isLoggedIn,
-		isAdmin,
-		login,
-		register,
-		logout,
-		updateProfile,
-		changePassword,
-	};
+  async function changePassword(oldPass, newPass) {
+    try {
+      const passwordDto = {
+        oldPassword: oldPass,
+        newPassword: newPass,
+      };
+
+      await api.put('/users/me/change-password', passwordDto);
+    } catch (error) {
+      console.error('Change password failed:', error);
+      throw error;
+    }
+  }
+
+  return {
+    token,
+    user,
+    isLoggedIn,
+    isAdmin,
+    login,
+    register,
+    logout,
+    updateProfile,
+    changePassword,
+  };
 });
